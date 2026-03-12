@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+        <color name="bg">#0B0F0D</color>
+        <color name="surface">#111A16</color>
+        <color name="surface2">#0F1713</color>
+        <color name="stroke">#1F2D27</color>
+
+        <color name="primary">#32D49A</color>
+        <color name="onPrimary">#0B0F0D</color>
+
+        <color name="textPrimary">#E9F6F0</color>
+        <color name="textSecondary">#8FB6A6</color>
+
+        <color name="chipBg">#13241D</color>
+</resources>
