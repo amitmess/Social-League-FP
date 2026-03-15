@@ -72,7 +72,7 @@ This submission implements **2 key screens** with **dynamic data (RecyclerView)*
 ---
 
 ## Team
-Amit Messil
-Dan Madpis
-Ran Efroni
+Amit Messil,
+Dan Madpis,
+Ran Efroni,
 Amit Mane
