@@ -78,12 +78,19 @@
                     android:textStyle="bold"
                     android:textSize="18sp"
                     android:textColor="@color/textPrimary" />
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Enter the final score to mark this football match as completed."
+                    android:textColor="@color/textSecondary"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="12dp"/>
 
             <EditText
                     android:id="@+id/etHomeScore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Home score"
+                    android:hint="Home team score"
                     android:inputType="number"
                     android:paddingTop="8dp"
                     android:textColor="@color/textPrimary"
@@ -93,7 +100,7 @@
                     android:id="@+id/etAwayScore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Away score"
+                    android:hint="Away team score"
                     android:inputType="number"
                     android:paddingTop="8dp"
                     android:textColor="@color/textPrimary"

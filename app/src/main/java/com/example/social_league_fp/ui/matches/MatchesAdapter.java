@@ -53,8 +53,7 @@ public class MatchesAdapter extends RecyclerView.Adapter<MatchesAdapter.VH> {
         // Location
         holder.tvLocation.setText(m.getLocation());
 
-        // Attendance line (כרגע משתמשים ב-title עד שתוסיף confirmed/maybe למודל)
-        // אם תרצה 1:1 ל-Lovable נוסיף ל-Match שדות confirmedCount/maybeCount ואז נחליף את השורה הזו.
+// Displays the current attendance summary for the match.
         holder.tvAttendance.setText(m.getAttendanceText());
 
         // Status pill + Score box

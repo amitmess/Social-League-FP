@@ -32,7 +32,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
         if (toolbar != null) {
             toolbar.setNavigationOnClickListener(v -> finish());
             toolbar.setTitle("Match Details");
-            toolbar.setSubtitle(" "); // יתעדכן אחרי טעינת match
+            toolbar.setSubtitle(" ");
         }
 
         String matchId = getIntent().getStringExtra(EXTRA_MATCH_ID);

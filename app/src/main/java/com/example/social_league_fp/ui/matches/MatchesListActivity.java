@@ -62,7 +62,7 @@ public class MatchesListActivity extends AppCompatActivity {
         for (Match m : all) {
             if (m.getStatus() == MatchStatus.UPCOMING) {
                 upcoming.add(m);
-            } else {
+            } else if (m.getStatus() == MatchStatus.PLAYED) {
                 completed.add(m);
             }
         }

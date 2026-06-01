@@ -33,17 +33,14 @@
                         android:textColor="@color/textSecondary"
                         android:textSize="14sp"
                         android:paddingTop="2dp" />
+                <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Manage your social football league: view matches, submit scores, and track completed games."
+                        android:textColor="@color/textSecondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="6dp"/>
             </LinearLayout>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/fabAdd"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:contentDescription="Add"
-                    android:src="@android:drawable/ic_input_add"
-                    android:backgroundTint="@color/primary"
-                    android:tint="@color/onPrimary"/>
         </RelativeLayout>
 
         <TextView
