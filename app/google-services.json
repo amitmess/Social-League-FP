@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "252949710383",
+    "project_id": "social-league-fdb86",
+    "storage_bucket": "social-league-fdb86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252949710383:android:eeb57e43c48d84203568da",
+        "android_client_info": {
+          "package_name": "com.example.social_league_fp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUOeYht9WMjtsC6ULCFi3eQvsuL1YBd7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

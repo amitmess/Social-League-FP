@@ -15,22 +15,31 @@ import com.example.social_league_fp.data.InMemoryMatchRepository;
 import com.example.social_league_fp.model.Match;
 import com.example.social_league_fp.model.MatchStatus;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class MatchDetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_MATCH_ID = "extra_match_id";
 
     private Match match;
+    private FirebaseAnalytics firebaseAnalytics;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_details);
 
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         // Toolbar back arrow + titles
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
-            toolbar.setNavigationOnClickListener(v -> finish());
+            toolbar.setNavigationOnClickListener(v -> {
+                Bundle backBundle = new Bundle();
+                backBundle.putString("from_screen", "match_details");
+                firebaseAnalytics.logEvent("navigate_back", backBundle);
+                android.util.Log.d("AnalyticsTest", "Sent event: navigate_back");
+                finish();
+            });
             toolbar.setTitle("Match Details");
             toolbar.setSubtitle(" ");
         }
@@ -44,6 +53,12 @@ public class MatchDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        Bundle detailsBundle = new Bundle();
+        detailsBundle.putString("match_id", match.getId());
+        detailsBundle.putString("match_title", match.getTitle());
+        detailsBundle.putString("match_status", match.getStatus().toString());
+        firebaseAnalytics.logEvent("open_match_details", detailsBundle);
+        android.util.Log.d("AnalyticsTest", "Sent event: open_match_details");
         // עדכון תת-כותרת אחרי שיש match
         if (toolbar != null) {
             toolbar.setSubtitle(match.getTitle()); // "Team A vs Team B"
@@ -97,7 +112,13 @@ public class MatchDetailsActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to save score", Toast.LENGTH_SHORT).show();
                 return;
             }
-
+            Bundle scoreBundle = new Bundle();
+            scoreBundle.putString("match_id", match.getId());
+            scoreBundle.putString("match_title", match.getTitle());
+            scoreBundle.putInt("home_score", home);
+            scoreBundle.putInt("away_score", away);
+            firebaseAnalytics.logEvent("submit_score", scoreBundle);
+            android.util.Log.d("AnalyticsTest", "Sent event: submit_score");
             Toast.makeText(this, "Score saved", Toast.LENGTH_SHORT).show();
             finish(); // חוזרים לרשימה; onResume ירענן
         });

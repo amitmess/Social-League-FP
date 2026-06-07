@@ -13,6 +13,7 @@ import com.example.social_league_fp.data.InMemoryMatchRepository;
 import com.example.social_league_fp.model.Match;
 import com.example.social_league_fp.model.MatchStatus;
 import com.example.social_league_fp.ui.details.MatchDetailsActivity;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +22,18 @@ public class MatchesListActivity extends AppCompatActivity {
 
     private MatchesAdapter upcomingAdapter;
     private MatchesAdapter completedAdapter;
+    private FirebaseAnalytics firebaseAnalytics;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_matches_list);
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("screen_name", "matches_list");
+        firebaseAnalytics.logEvent("open_matches_screen", bundle);
+        android.util.Log.d("AnalyticsTest", "Sent event: open_matches_screen");
 
         RecyclerView rvUpcoming = findViewById(R.id.rvUpcoming);
         RecyclerView rvCompleted = findViewById(R.id.rvCompleted);
