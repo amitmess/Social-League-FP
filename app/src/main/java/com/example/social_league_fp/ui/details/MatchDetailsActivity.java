@@ -32,6 +32,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
     private MatchRepository repository;
     private ListenerRegistration matchListener;
     private String matchId;
+    private boolean detailsEventLogged = false;
 
     private TextView tvTitle, tvDateTime, tvLocation, tvStatus, tvCurrentScore, tvAttendance;
     private EditText etHome, etAway;
@@ -54,6 +55,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
         if (matchId == null) {
             Toast.makeText(this, "Match ID missing", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
     }
 
@@ -75,7 +77,12 @@ public class MatchDetailsActivity extends AppCompatActivity {
     private void setupToolbar() {
         toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
-            toolbar.setNavigationOnClickListener(v -> finish());
+            toolbar.setNavigationOnClickListener(v -> {
+                Bundle backBundle = new Bundle();
+                backBundle.putString("from_screen", "match_details");
+                firebaseAnalytics.logEvent("navigate_back", backBundle);
+                finish();
+            });
             toolbar.setTitle("Match Details");
         }
     }
@@ -95,6 +102,9 @@ public class MatchDetailsActivity extends AppCompatActivity {
     }
 
     private void startListening() {
+        if (matchId == null) {
+            return;
+        }
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         matchListener = repository.getMatchById(matchId, new MatchRepository.MatchCallback() {
             @Override
@@ -116,6 +126,15 @@ public class MatchDetailsActivity extends AppCompatActivity {
     private void updateUI() {
         if (match == null) return;
 
+        if (!detailsEventLogged) {
+            Bundle detailsBundle = new Bundle();
+            detailsBundle.putString("match_id", matchId);
+            detailsBundle.putString("match_title", match.getTitle());
+            detailsBundle.putString("match_status", match.getStatus().toString());
+            firebaseAnalytics.logEvent("open_match_details", detailsBundle);
+            detailsEventLogged = true;
+        }
+
         if (toolbar != null) {
             toolbar.setSubtitle(match.getTitle());
         }
@@ -125,7 +144,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
         tvLocation.setText(match.getLocation());
         tvStatus.setText(match.getStatus() == MatchStatus.PLAYED ? "Finished" : "Upcoming");
         tvCurrentScore.setText("Current score: " + match.getScoreText());
-        
+
         if (tvAttendance != null) {
             tvAttendance.setText(match.getAttendanceText());
         }
@@ -153,6 +172,11 @@ public class MatchDetailsActivity extends AppCompatActivity {
             away = Integer.parseInt(awayStr);
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Scores must be numbers", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (home < 0 || away < 0) {
+            Toast.makeText(this, "Scores must be >= 0", Toast.LENGTH_SHORT).show();
             return;
         }
 
