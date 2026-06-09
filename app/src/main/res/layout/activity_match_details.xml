@@ -18,6 +18,13 @@
             app:title="Match Details"
             app:subtitle="Sunday Kickabout" />
 
+    <ProgressBar
+        android:id="@+id/progressBarDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
     <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -54,15 +61,23 @@
                     android:textColor="@color/textPrimary" />
 
             <TextView
-                    android:id="@+id/tvDetailsStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Upcoming"
-                    android:paddingTop="4dp"
-                    android:textColor="@color/textPrimary" />
+                android:id="@+id/tvDetailsStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Upcoming"
+                android:paddingTop="4dp"
+                android:textColor="@color/textPrimary" />
 
             <TextView
-                    android:id="@+id/tvDetailsCurrentScore"
+                android:id="@+id/tvDetailsAttendance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="0 confirmed"
+                android:paddingTop="4dp"
+                android:textColor="@color/textPrimary" />
+
+            <TextView
+                android:id="@+id/tvDetailsCurrentScore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Current score: —"

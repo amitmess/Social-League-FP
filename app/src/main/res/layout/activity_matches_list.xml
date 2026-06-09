@@ -9,6 +9,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -61,6 +68,16 @@
             android:nestedScrollingEnabled="false" />
 
         <TextView
+            android:id="@+id/tvNoUpcoming"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No upcoming matches available"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:visibility="gone" />
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Completed"
@@ -75,5 +92,16 @@
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false" />
 
+        <TextView
+            android:id="@+id/tvNoCompleted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No completed matches available"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:visibility="gone" />
+
     </LinearLayout>
 </ScrollView>
+
