@@ -21,6 +21,9 @@ import com.example.social_league_fp.model.MatchStatus;
 import com.example.social_league_fp.ui.details.MatchDetailsActivity;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.auth.FirebaseAuth;
+import com.example.social_league_fp.ui.auth.LoginActivity;
+import com.example.social_league_fp.ui.profile.UserProfileActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,16 @@ public class MatchesListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_matches_list);
 
         repository = new FirestoreMatchRepository();
@@ -52,6 +65,14 @@ public class MatchesListActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         tvNoUpcoming = findViewById(R.id.tvNoUpcoming);
         tvNoCompleted = findViewById(R.id.tvNoCompleted);
+
+        View btnProfile = findViewById(R.id.btnProfile);
+        if (btnProfile != null) {
+            btnProfile.setOnClickListener(v -> {
+                Intent intent = new Intent(MatchesListActivity.this, UserProfileActivity.class);
+                startActivity(intent);
+            });
+        }
 
         RecyclerView rvUpcoming = findViewById(R.id.rvUpcoming);
         RecyclerView rvCompleted = findViewById(R.id.rvCompleted);

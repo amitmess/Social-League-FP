@@ -16,4 +16,7 @@
         <item name="android:textColor">@color/textPrimary</item>
         <item name="android:textColorHint">@color/textSecondary</item>
     </style>
+    <style name="ShapeAppearanceOverlay.App.CircleImageView" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

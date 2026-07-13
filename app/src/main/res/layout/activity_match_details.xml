@@ -60,6 +60,15 @@
                     android:paddingTop="4dp"
                     android:textColor="@color/textPrimary" />
 
+            <Button
+                android:id="@+id/btnViewLocation"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show Stadium GPS / Location"
+                android:textColor="@color/primary"
+                android:paddingTop="4dp" />
+
             <TextView
                 android:id="@+id/tvDetailsStatus"
                 android:layout_width="match_parent"

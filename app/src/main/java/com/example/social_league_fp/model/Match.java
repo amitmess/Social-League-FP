@@ -4,19 +4,51 @@ public class Match {
     private final String id;
     private final String homeTeam;
     private final String awayTeam;
-    private final String dateTime;   // נשאר String (כמו אצלך)
+    private final String dateTime;
     private final String location;
 
     private MatchStatus status;
     private Integer homeScore; // nullable
     private Integer awayScore; // nullable
 
-    // NEW: attendance counts (כמו ב-Lovable)
     private int confirmedCount;
     private int maybeCount;
 
+    private Double latitude;
+    private Double longitude;
+
     /**
-     * NEW constructor (כולל confirmed/maybe)
+     * Complete constructor including coordinates
+     */
+    public Match(String id,
+                 String homeTeam,
+                 String awayTeam,
+                 String dateTime,
+                 String location,
+                 MatchStatus status,
+                 Integer homeScore,
+                 Integer awayScore,
+                 int confirmedCount,
+                 int maybeCount,
+                 Double latitude,
+                 Double longitude) {
+
+        this.id = id;
+        this.homeTeam = homeTeam;
+        this.awayTeam = awayTeam;
+        this.dateTime = dateTime;
+        this.location = location;
+        this.status = status;
+        this.homeScore = homeScore;
+        this.awayScore = awayScore;
+        this.confirmedCount = confirmedCount;
+        this.maybeCount = maybeCount;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    /**
+     * Constructor without coordinates
      */
     public Match(String id,
                  String homeTeam,
@@ -29,20 +61,11 @@ public class Match {
                  int confirmedCount,
                  int maybeCount) {
 
-        this.id = id;
-        this.homeTeam = homeTeam;
-        this.awayTeam = awayTeam;
-        this.dateTime = dateTime;
-        this.location = location;
-        this.status = status;
-        this.homeScore = homeScore;
-        this.awayScore = awayScore;
-        this.confirmedCount = confirmedCount;
-        this.maybeCount = maybeCount;
+        this(id, homeTeam, awayTeam, dateTime, location, status, homeScore, awayScore, confirmedCount, maybeCount, null, null);
     }
 
     /**
-     * OLD constructor (תאימות לאחור) – אם קוד אחר משתמש בחתימה הישנה
+     * Compatibility constructor
      */
     public Match(String id,
                  String homeTeam,
@@ -53,7 +76,7 @@ public class Match {
                  Integer homeScore,
                  Integer awayScore) {
 
-        this(id, homeTeam, awayTeam, dateTime, location, status, homeScore, awayScore, 0, 0);
+        this(id, homeTeam, awayTeam, dateTime, location, status, homeScore, awayScore, 0, 0, null, null);
     }
 
     public String getId() { return id; }
@@ -70,11 +93,16 @@ public class Match {
     public void setHomeScore(Integer homeScore) { this.homeScore = homeScore; }
     public void setAwayScore(Integer awayScore) { this.awayScore = awayScore; }
 
-    // NEW getters/setters
     public int getConfirmedCount() { return confirmedCount; }
     public int getMaybeCount() { return maybeCount; }
     public void setConfirmedCount(int confirmedCount) { this.confirmedCount = confirmedCount; }
     public void setMaybeCount(int maybeCount) { this.maybeCount = maybeCount; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 
     public String getTitle() {
         return homeTeam + " vs " + awayTeam;
@@ -85,10 +113,6 @@ public class Match {
         return homeScore + " - " + awayScore;
     }
 
-    /**
-     * NEW: טקסט attendance כמו Lovable:
-     * "3 confirmed · 1 maybe" / "0 confirmed" וכו'
-     */
     public String getAttendanceText() {
         if (maybeCount > 0) {
             return confirmedCount + " confirmed · " + maybeCount + " maybe";

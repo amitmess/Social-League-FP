@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,6 +19,7 @@ import com.example.social_league_fp.data.FirestoreMatchRepository;
 import com.example.social_league_fp.data.MatchRepository;
 import com.example.social_league_fp.model.Match;
 import com.example.social_league_fp.model.MatchStatus;
+import com.example.social_league_fp.ui.location.StadiumLocationActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -36,7 +38,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvDateTime, tvLocation, tvStatus, tvCurrentScore, tvAttendance;
     private EditText etHome, etAway;
-    private Button btnSave;
+    private Button btnSave, btnViewLocation;
     private MaterialToolbar toolbar;
     private ProgressBar progressBar;
 
@@ -69,9 +71,33 @@ public class MatchDetailsActivity extends AppCompatActivity {
         etHome = findViewById(R.id.etHomeScore);
         etAway = findViewById(R.id.etAwayScore);
         btnSave = findViewById(R.id.btnSaveScore);
+        btnViewLocation = findViewById(R.id.btnViewLocation);
         progressBar = findViewById(R.id.progressBarDetails); // Make sure this exists in layout
         
         btnSave.setOnClickListener(v -> submitScore());
+        
+        if (btnViewLocation != null) {
+            btnViewLocation.setOnClickListener(v -> {
+                if (match != null) {
+                    Intent intent = new Intent(this, StadiumLocationActivity.class);
+                    intent.putExtra("extra_match_id", match.getId());
+                    intent.putExtra("extra_location", match.getLocation());
+                    if (match.getLatitude() != null) {
+                        intent.putExtra("extra_latitude", match.getLatitude());
+                    }
+                    if (match.getLongitude() != null) {
+                        intent.putExtra("extra_longitude", match.getLongitude());
+                    }
+                    
+                    // Log Analytics Event: open_location
+                    Bundle anaBundle = new Bundle();
+                    anaBundle.putString("match_id", match.getId());
+                    firebaseAnalytics.logEvent("open_location", anaBundle);
+                    
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
     private void setupToolbar() {

@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "579790104945",
-    "project_id": "social-league-firestore",
-    "storage_bucket": "social-league-firestore.firebasestorage.app"
+    "project_number": "252949710383",
+    "project_id": "social-league-fdb86",
+    "storage_bucket": "social-league-fdb86.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:579790104945:android:4f23f0c4bfa93e047aaed0",
+        "mobilesdk_app_id": "1:252949710383:android:eeb57e43c48d84203568da",
         "android_client_info": {
           "package_name": "com.example.social_league_fp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "252949710383-5s2eskluno5hppmvv5odtq13b40r90c7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.social_league_fp",
+            "certificate_hash": "2bd6a86a2787314998be1317361294c4e3bf8072"
+          }
+        },
+        {
+          "client_id": "252949710383-k1097hot64tgbj1s95lh13am68gc4duh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAP3_KuIpEy96uPfdlXnL-KUrZd6ZUXZMQ"
+          "current_key": "AIzaSyBUOeYht9WMjtsC6ULCFi3eQvsuL1YBd7Q"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "252949710383-k1097hot64tgbj1s95lh13am68gc4duh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
