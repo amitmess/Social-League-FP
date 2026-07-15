@@ -28,6 +28,10 @@ import com.example.social_league_fp.ui.profile.UserProfileActivity;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Main matches dashboard displaying list divisions of upcoming and completed matches.
+ * Gated by Firebase session status and synced in real-time with Firestore.
+ */
 public class MatchesListActivity extends AppCompatActivity {
 
     private MatchesAdapter upcomingAdapter;
@@ -44,6 +48,7 @@ public class MatchesListActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Security check: Redirect unauthenticated app launches to the gatekeeper Login screen.
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() == null) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -58,6 +63,7 @@ public class MatchesListActivity extends AppCompatActivity {
         repository = new FirestoreMatchRepository();
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        // Log dashboard access metrics to Firebase Analytics.
         Bundle bundle = new Bundle();
         bundle.putString("screen_name", "matches_list");
         firebaseAnalytics.logEvent("open_matches_screen", bundle);
@@ -66,6 +72,7 @@ public class MatchesListActivity extends AppCompatActivity {
         tvNoUpcoming = findViewById(R.id.tvNoUpcoming);
         tvNoCompleted = findViewById(R.id.tvNoCompleted);
 
+        // Navigate to user profile settings screen on click.
         View btnProfile = findViewById(R.id.btnProfile);
         if (btnProfile != null) {
             btnProfile.setOnClickListener(v -> {
@@ -90,6 +97,7 @@ public class MatchesListActivity extends AppCompatActivity {
         rvCompleted.setAdapter(completedAdapter);
     }
 
+    // Open detailed match overview screen passing document identification.
     private void openDetails(Match match) {
         Intent i = new Intent(this, MatchDetailsActivity.class);
         i.putExtra(MatchDetailsActivity.EXTRA_MATCH_ID, match.getId());
@@ -99,17 +107,20 @@ public class MatchesListActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // Register active listeners when screen enters foreground.
         startListening();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        // Unregister active database listeners to release connections and prevent leaks.
         if (matchesListener != null) {
             matchesListener.remove();
         }
     }
 
+    // Attach real-time Firestore database snapshot stream.
     private void startListening() {
         progressBar.setVisibility(View.VISIBLE);
         matchesListener = repository.getAllMatches(new MatchRepository.MatchesCallback() {
@@ -128,10 +139,12 @@ public class MatchesListActivity extends AppCompatActivity {
         });
     }
 
+    // Separate upcoming and completed matches before updating list adapter models.
     private void updateUI(List<Match> matches) {
         List<Match> upcoming = new ArrayList<>();
         List<Match> completed = new ArrayList<>();
 
+        // Group matches according to play status enum.
         for (Match m : matches) {
             if (m.getStatus() == MatchStatus.UPCOMING) {
                 upcoming.add(m);

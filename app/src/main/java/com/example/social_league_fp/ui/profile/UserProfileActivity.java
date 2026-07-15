@@ -25,6 +25,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Renders basic user identification (display name, email, avatar photo) extracted
+ * directly from the active FirebaseUser session. Manages log-out and includes a Crashlytics QA trigger.
+ */
 public class UserProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "UserProfileActivity";
@@ -45,6 +49,7 @@ public class UserProfileActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        // Security check: Redirect unauthenticated requests to Login activity.
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
             navigateToLogin();
@@ -53,7 +58,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_user_profile);
 
-        // Track Screen View
+        // Log profile screen loading event in Firebase Analytics.
         Bundle bundle = new Bundle();
         bundle.putString("screen_name", "user_profile");
         mFirebaseAnalytics.logEvent("open_profile", bundle);
@@ -71,6 +76,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         btnLogout.setOnClickListener(v -> logout());
 
+        // QA TEST ONLY: Clicking the display name triggers a manual runtime crash to verify Crashlytics setup.
         tvDisplayName.setOnClickListener(v -> {
             throw new RuntimeException("Test Crash - Social League FP");
         });
@@ -83,10 +89,12 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
+    // Populate UI views directly using the active cached FirebaseUser authentication session details.
     private void populateUserData(FirebaseUser user) {
         tvDisplayName.setText(user.getDisplayName() != null ? user.getDisplayName() : "Social League Player");
         tvEmail.setText(user.getEmail() != null ? user.getEmail() : "");
 
+        // Asynchronously load the user's avatar image from the Google profile URL.
         String photoUrl = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
         if (photoUrl != null) {
             new Thread(() -> {
@@ -105,11 +113,12 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
+    // Sign out from Firebase Auth, log telemetry metrics, and redirect to login gateway.
     private void logout() {
         mAuth.signOut();
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
 
-        // Track Event
+        // Track successful session destruction in Analytics.
         Bundle logoutBundle = new Bundle();
         logoutBundle.putString("status", "success");
         mFirebaseAnalytics.logEvent("logout", logoutBundle);
@@ -117,6 +126,7 @@ public class UserProfileActivity extends AppCompatActivity {
         navigateToLogin();
     }
 
+    // Redirect to the login screen, clearing the task history backstack.
     private void navigateToLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

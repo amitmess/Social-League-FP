@@ -30,6 +30,10 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.Locale;
 
+/**
+ * Handles device GPS location tracking, requests runtime permissions, retrieves current user coordinates,
+ * calculates the geodesic distance to the match stadium, and launches an external maps application.
+ */
 public class StadiumLocationActivity extends AppCompatActivity {
 
     private static final String TAG = "StadiumLocationActivity";
@@ -60,7 +64,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        // Read extras
+        // Read target stadium location coordinates and label passed from details intent.
         Intent intent = getIntent();
         matchId = intent.getStringExtra("extra_match_id");
         stadiumName = intent.getStringExtra("extra_location");
@@ -72,7 +76,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
             hasStadiumCoords = true;
         }
 
-        // Track Screen View
+        // Track GPS location screen load metrics.
         Bundle bundle = new Bundle();
         bundle.putString("screen_name", "stadium_location");
         bundle.putString("match_id", matchId);
@@ -82,6 +86,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
         setupToolbar();
         displayStadiumData();
 
+        // Initiate GPS flow only if stadium coordinates are configured.
         if (hasStadiumCoords) {
             checkLocationPermissions();
         } else {
@@ -116,12 +121,14 @@ public class StadiumLocationActivity extends AppCompatActivity {
         }
     }
 
+    // Verify whether fine location permission is already granted; request it if not.
     private void checkLocationPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             logPermissionEvent("granted");
             getUserLocation();
         } else {
+            // Request runtime location permissions from the user.
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_REQUEST_CODE);
@@ -136,6 +143,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
                 logPermissionEvent("granted");
                 getUserLocation();
             } else {
+                // Graceful degradation: Log permission denial, inform user, and disable distance updates.
                 logPermissionEvent("denied");
                 Toast.makeText(this, "Location permission denied. Cannot calculate distance.", Toast.LENGTH_LONG).show();
                 tvUserCoords.setText("Permission denied. Enable location services in settings.");
@@ -143,6 +151,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
         }
     }
 
+    // Acquire current GPS coordinates using the Google Play Services Location API.
     private void getUserLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -151,7 +160,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
         progressBarLocation.setVisibility(View.VISIBLE);
         tvUserCoords.setText("Acquiring GPS lock...");
 
-        // Request current single location
+        // Request highly accurate current location update with cancellation token.
         CancellationTokenSource cts = new CancellationTokenSource();
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.getToken())
                 .addOnSuccessListener(this, location -> {
@@ -159,7 +168,7 @@ public class StadiumLocationActivity extends AppCompatActivity {
                     if (location != null) {
                         updateUserLocation(location);
                     } else {
-                        // Fallback to last known location if current is null
+                        // Fallback: Attempt to fetch the last cached location if current is null.
                         fusedLocationClient.getLastLocation().addOnSuccessListener(this, lastLocation -> {
                             if (lastLocation != null) {
                                 updateUserLocation(lastLocation);
@@ -173,18 +182,20 @@ public class StadiumLocationActivity extends AppCompatActivity {
                 .addOnFailureListener(this, e -> {
                     progressBarLocation.setVisibility(View.GONE);
                     Log.e(TAG, "Failed to get location", e);
+                    // Report GPS hardware / system failures to Crashlytics for monitoring.
                     FirebaseCrashlytics.getInstance().recordException(e);
                     tvUserCoords.setText("Error acquiring location: " + e.getMessage());
                 });
     }
 
+    // Calculate the geodesic distance between user and stadium coordinates in kilometers.
     private void updateUserLocation(Location location) {
         double userLat = location.getLatitude();
         double userLng = location.getLongitude();
 
         tvUserCoords.setText(String.format(Locale.getDefault(), "Your Location: %.5f, %.5f", userLat, userLng));
 
-        // Calculate Distance
+        // Use Android Location math API to compute the distance in meters.
         float[] results = new float[1];
         Location.distanceBetween(userLat, userLng, stadiumLat, stadiumLng, results);
         float distanceInMeters = results[0];
@@ -194,12 +205,13 @@ public class StadiumLocationActivity extends AppCompatActivity {
         btnGetDirections.setEnabled(true);
     }
 
+    // Launch Google Maps via implicit Intent for turn-by-turn navigation guidance.
     private void launchMapsIntent() {
         Uri gmmIntentUri = Uri.parse("geo:" + stadiumLat + "," + stadiumLng + "?q=" + Uri.encode(stadiumName));
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
 
-        // Track maps launch
+        // Track maps launch telemetry.
         Bundle anaBundle = new Bundle();
         anaBundle.putString("match_id", matchId);
         anaBundle.putString("stadium_name", stadiumName);
@@ -208,13 +220,14 @@ public class StadiumLocationActivity extends AppCompatActivity {
         if (mapIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(mapIntent);
         } else {
-            // Fallback: browser URL
+            // Fallback: Open google maps search URL in standard web browser.
             String url = String.format(Locale.US, "https://www.google.com/maps/search/?api=1&query=%f,%f", stadiumLat, stadiumLng);
             Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             startActivity(webIntent);
         }
     }
 
+    // Track GPS permissions grant/denial trends.
     private void logPermissionEvent(String result) {
         Bundle bundle = new Bundle();
         bundle.putString("permission_type", "location");

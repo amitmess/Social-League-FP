@@ -1,5 +1,9 @@
 package com.example.social_league_fp.model;
 
+/**
+ * Domain model representing a soccer match. Holds team names, date, location,
+ * status, attendance stats, and stadium geographical coordinates.
+ */
 public class Match {
     private final String id;
     private final String homeTeam;
@@ -108,11 +112,13 @@ public class Match {
         return homeTeam + " vs " + awayTeam;
     }
 
+    // Format score text representation or return placeholder if unsubmitted.
     public String getScoreText() {
         if (homeScore == null || awayScore == null) return "—";
         return homeScore + " - " + awayScore;
     }
 
+    // Format attendance numbers details for clean UI presentation.
     public String getAttendanceText() {
         if (maybeCount > 0) {
             return confirmedCount + " confirmed · " + maybeCount + " maybe";

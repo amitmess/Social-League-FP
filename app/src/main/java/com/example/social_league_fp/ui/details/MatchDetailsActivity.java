@@ -24,6 +24,10 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.firestore.ListenerRegistration;
 
+/**
+ * Displays full details of a specific match and allows organizers/players to edit
+ * and persist final scores directly to Firestore. Also acts as the launch gate for location calculations.
+ */
 public class MatchDetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_MATCH_ID = "extra_match_id";
@@ -72,10 +76,11 @@ public class MatchDetailsActivity extends AppCompatActivity {
         etAway = findViewById(R.id.etAwayScore);
         btnSave = findViewById(R.id.btnSaveScore);
         btnViewLocation = findViewById(R.id.btnViewLocation);
-        progressBar = findViewById(R.id.progressBarDetails); // Make sure this exists in layout
+        progressBar = findViewById(R.id.progressBarDetails);
         
         btnSave.setOnClickListener(v -> submitScore());
         
+        // Launch GPS screen to show coordinates, compute distance, and trigger maps intent.
         if (btnViewLocation != null) {
             btnViewLocation.setOnClickListener(v -> {
                 if (match != null) {
@@ -89,7 +94,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
                         intent.putExtra("extra_longitude", match.getLongitude());
                     }
                     
-                    // Log Analytics Event: open_location
+                    // Track that the user navigated to inspect the stadium location.
                     Bundle anaBundle = new Bundle();
                     anaBundle.putString("match_id", match.getId());
                     firebaseAnalytics.logEvent("open_location", anaBundle);
@@ -116,17 +121,20 @@ public class MatchDetailsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // Hook real-time document listeners when screen is visible.
         startListening();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        // Remove document level real-time listeners on hide to save network bandwidth.
         if (matchListener != null) {
             matchListener.remove();
         }
     }
 
+    // Attach real-time Firestore listener for updates to this specific match document.
     private void startListening() {
         if (matchId == null) {
             return;
@@ -149,9 +157,11 @@ public class MatchDetailsActivity extends AppCompatActivity {
         });
     }
 
+    // Bind current match data fields and populate input score hints dynamically.
     private void updateUI() {
         if (match == null) return;
 
+        // Log match details screen visit. Ensure it occurs once per session.
         if (!detailsEventLogged) {
             Bundle detailsBundle = new Bundle();
             detailsBundle.putString("match_id", matchId);
@@ -183,6 +193,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
         }
     }
 
+    // Validate integer inputs and submit updated scores back to Firestore.
     private void submitScore() {
         String homeStr = etHome.getText().toString().trim();
         String awayStr = etAway.getText().toString().trim();
@@ -193,6 +204,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
         }
 
         int home, away;
+        // Validation: Ensure values entered parse correctly as numbers.
         try {
             home = Integer.parseInt(homeStr);
             away = Integer.parseInt(awayStr);
@@ -201,11 +213,13 @@ public class MatchDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        // Validation: Verify scores are physically possible (non-negative).
         if (home < 0 || away < 0) {
             Toast.makeText(this, "Scores must be >= 0", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Persist score changes directly to Cloud Firestore.
         repository.updateScore(matchId, home, away, () -> {
             Toast.makeText(this, "Score updated successfully", Toast.LENGTH_SHORT).show();
             logScoreEvent(home, away);
@@ -216,6 +230,7 @@ public class MatchDetailsActivity extends AppCompatActivity {
         });
     }
 
+    // Record the score submission telemetry for historical match records analysis.
     private void logScoreEvent(int home, int away) {
         Bundle scoreBundle = new Bundle();
         scoreBundle.putString("match_id", matchId);

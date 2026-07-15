@@ -15,23 +15,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Concrete implementation of the MatchRepository contract. Manages all query operations,
+ * updates, and real-time subscription listeners against the Google Cloud Firestore database.
+ */
 public class FirestoreMatchRepository implements MatchRepository {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final String COLLECTION_MATCHES = "matches";
     private static final String TAG = "FirestoreRepository";
 
+    // Registers a real-time Firestore database snapshot listener for matches collection.
     @Override
     public ListenerRegistration getAllMatches(MatchesCallback callback) {
         return db.collection(COLLECTION_MATCHES)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e(TAG, "Listen failed.", error);
+                        // Report database subscription issues to Crashlytics.
                         FirebaseCrashlytics.getInstance().recordException(error);
                         callback.onError(error);
                         return;
                     }
 
+                    // Seeding fallback: automatically populate demo items if collection is empty.
                     if (value != null && value.isEmpty()) {
                         seedDatabase();
                     }
@@ -49,6 +56,7 @@ public class FirestoreMatchRepository implements MatchRepository {
                 });
     }
 
+    // Creates initial demo matches data only when the collection is empty, ensuring sample listings are visible.
     private void seedDatabase() {
         String[] homeTeams = {"Maccabi", "Hapoel", "Beitar", "Maccabi Haifa", "Hapoel Beer Sheva", "Bnei Sakhnin", "Maccabi Tel Aviv", "Hapoel Haifa", "Ashdod", "Netanya"};
         String[] awayTeams = {"Hapoel Tel Aviv", "Maccabi Petah Tikva", "Hapoel Jerusalem", "Bnei Yehuda", "Hapoel Hadera", "Ironi Kiryat Shmona", "Maccabi Jaffa", "Hapoel Ramat Gan", "Hapoel Umm al-Fahm", "Maccabi Herzliya"};
@@ -65,11 +73,11 @@ public class FirestoreMatchRepository implements MatchRepository {
             match.put("latitude", 32.0853 + (i * 0.01));
             match.put("longitude", 34.7818 + (i * 0.01));
 
-            if (i < 4) { // 4 PLAYED
+            if (i < 4) { // 4 completed matches.
                 match.put("status", "PLAYED");
                 match.put("homeScore", (int) (Math.random() * 5));
                 match.put("awayScore", (int) (Math.random() * 5));
-            } else { // 6 UPCOMING
+            } else { // 6 upcoming matches.
                 match.put("status", "UPCOMING");
                 match.put("homeScore", null);
                 match.put("awayScore", null);
@@ -86,6 +94,7 @@ public class FirestoreMatchRepository implements MatchRepository {
         }
     }
 
+    // Registers a real-time Firestore database listener targeting a single match document.
     @Override
     public ListenerRegistration getMatchById(String id, MatchCallback callback) {
         return db.collection(COLLECTION_MATCHES).document(id)
@@ -106,6 +115,7 @@ public class FirestoreMatchRepository implements MatchRepository {
                 });
     }
 
+    // Persist score edits directly to the match document, marking status as finished.
     @Override
     public void updateScore(String id, int homeScore, int awayScore, Runnable onSuccess, OnError onError) {
         Map<String, Object> updates = new HashMap<>();
@@ -117,11 +127,13 @@ public class FirestoreMatchRepository implements MatchRepository {
                 .update(updates)
                 .addOnSuccessListener(aVoid -> onSuccess.run())
                 .addOnFailureListener(e -> {
+                    // Record write/network updates errors to Crashlytics.
                     FirebaseCrashlytics.getInstance().recordException(e);
                     onError.onError(e);
                 });
     }
 
+    // Parse a Firestore document snapshot into a type-safe Java Match model.
     private Match parseMatch(DocumentSnapshot doc) {
         try {
             String statusText = doc.getString("status");
@@ -148,6 +160,7 @@ public class FirestoreMatchRepository implements MatchRepository {
             );
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse document: " + doc.getId(), e);
+            // Record mapping exceptions to catch data schema mismatches.
             FirebaseCrashlytics.getInstance().recordException(e);
             return null;
         }
