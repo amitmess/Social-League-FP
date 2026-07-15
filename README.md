@@ -1,78 +1,78 @@
 # Social League — Mobile Apps Final Project (Android)
 
-## Overview
-Social League is a simple Android app prototype for managing a private sports league.
-This submission implements **2 key screens** with **dynamic data (RecyclerView)** and a core action (**Submit Score**) as required.
-
-✅ Offline only (no API)  
-✅ No persistence (no DB / files) — in-memory data only
+Social League is a native Android application designed to manage private casual soccer leagues. The app features real-time database synchronization, Google Authentication, and geographical location tracking to guide players to match venues.
 
 ---
 
-## Key Features
-### 1) Matches List (RecyclerView)
-- Displays matches split into **Upcoming** and **Completed**
-- Each match is shown as a styled card (dark UI)
-- Clicking a match opens the details screen
+## Key Features & Screen Map
 
-### 2) Match Details
-- Shows match details (teams, date/time, location, status)
-- **Submit Score**: enter home/away score → match becomes **Completed** and score updates in the list
-- Top-left back arrow returns to the list
+The application consists of exactly five functional screens:
 
----
-
-## Tech Stack / Tools
-- Android (Java)
-- XML layouts (Material UI styling)
-- RecyclerView (dynamic lists)
-- InMemory Repository (data stored in RAM)
-- GitHub for version control
-
----
-
-## Project Structure (Main)
-- `ui/matches/MatchesListActivity` — list screen (Upcoming/Completed RecyclerViews)
-- `ui/matches/MatchesAdapter` — binds match cards
-- `ui/details/MatchDetailsActivity` — details + Submit Score
-- `data/InMemoryMatchRepository` — in-memory data source
-- `model/Match`, `model/MatchStatus` — data models
+1.  **Google Login (`LoginActivity`):**
+    *   Secure gateway gating all application actions.
+    *   Authenticates users using Google Sign-In and maps credentials to Firebase Authentication.
+    *   Saves and caches session states for rapid auto-redirection on future app launches.
+2.  **Matches List (`MatchesListActivity`):**
+    *   Main dashboard divided dynamically into **Upcoming** and **Completed** sections.
+    *   Utilizes a real-time Firestore listener; any score updates propagate across all online devices immediately.
+    *   Provides quick toolbar entry points to user profile records.
+3.  **Match Details (`MatchDetailsActivity`):**
+    *   Displays full match metadata including datetime, teams, status, and attendee counts.
+    *   Allows managers to submit final match scores with validation rules (must be non-negative integers).
+    *   Directly persists edits back to Cloud Firestore, automatically moving the match to the completed section.
+4.  **User Profile (`UserProfileActivity`):**
+    *   Renders display name, email address, and avatar circular image retrieved directly from the cached `FirebaseUser` session.
+    *   Manages session sign-out, clearing task flags, and redirecting users back to the Login gateway.
+    *   Includes a hidden developer test crash callback (double tap/click on display name) to trigger a test exception for verifying Crashlytics logs.
+5.  **Stadium Location (`StadiumLocationActivity`):**
+    *   Performs device GPS telemetry checks. Handles location permissions (`ACCESS_FINE_LOCATION`) at runtime.
+    *   Retrieves high-accuracy device lat/lng values using `FusedLocationProviderClient`.
+    *   Computes geodesic distance in kilometers between the user and the match stadium using `Location.distanceBetween`.
+    *   Launches turn-by-turn routing guidelines in Google Maps using an implicit navigation Intent.
 
 ---
 
-## How to Run
-### Option A: Android Studio (recommended)
-1. Clone the repo:
-   git clone <YOUR_GITHUB_REPO_URL>
-2. Open the project folder in Android Studio
-3. Let Gradle sync finish
-4. Run the app on an Emulator (e.g., Pixel 6) or a physical device
+## Tech Stack & Integrations
 
-### Option B: IntelliJ IDEA (Android plugin + SDK required)
-1. Open the project as a Gradle project
-2. Ensure:
-  - Gradle JVM is set to JDK 17
-  - Android SDK platform (compileSdk) is installed
-3. Run on emulator/device
+*   **Platform:** Native Android (Java), Compile/Target SDK 34, Min SDK 24.
+*   **Database:** Cloud Firestore (real-time stream listeners for documents and collections).
+*   **Authentication:** Firebase Authentication (Google OAuth provider).
+*   **Diagnostics:** Firebase Crashlytics (captures location, database, and system level exceptions).
+*   **Telemetry:** Firebase Analytics (tracks custom event logs for transitions, updates, and errors).
+*   **Location:** Google Play Services Location API.
+*   **Build System:** Gradle (Kotlin DSL), JDK 17.
 
 ---
 
-## Usage Flow (Quick Test)
-1. Open the app → Matches List appears
-2. Tap an upcoming match → opens Match Details
-3. Enter Home/Away score → Save
-4. Return to Matches List → match moves to Completed and displays the score
+## Setup & Configuration
+
+### Prerequisites
+1.  Add your `google-services.json` file inside the `app/` directory of the project.
+2.  Ensure Google Sign-In is enabled in your Firebase console.
+3.  Register your debug SHA-1 fingerprint under the Android application settings in the Firebase Console.
+
+### Running the App
+*   **Via Android Studio:** Import the root folder, let Gradle sync complete, and run the app on an Emulator (API 34 with Google Play services) or a connected debugging device.
+*   **Via CLI:** If a device is connected, run:
+    ```powershell
+    .\gradlew installDebug
+    ```
 
 ---
 
-## Notes / Constraints
-- No backend, no network calls
-- No database or file storage — data resets on app restart (in-memory only)
+## Firestore Database Structure
 
----
+*   **Collection: `matches`**
+    *   `homeTeam`: String
+    *   `awayTeam`: String
+    *   `locationName`: String
+    *   `dateTime`: String
+    *   `status`: String (`"UPCOMING"` or `"PLAYED"`)
+    *   `homeScore`: Integer (Nullable)
+    *   `awayScore`: Integer (Nullable)
+    *   `confirmed`: Integer (Attendance count)
+    *   `maybe`: Integer (Attendance count)
+    *   `latitude`: Double (Stadium coordinates)
+    *   `longitude`: Double (Stadium coordinates)
 
-## Team
-Amit Messil,
-Dan Madpis,
-Ran Efroni,
-Amit Mane
+*Note: The repository is configured to automatically seed 10 demo matches into Firestore if the collection is empty, ensuring sample listings are immediately visible.*
